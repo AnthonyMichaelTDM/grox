@@ -5,20 +5,20 @@
 #   left, right, normal, inverted: absolute movement
 
 # devices to manipulate
-$screen = 'eDP1'
-$touchscreen = 'Atmel Atmel maXTouch Digitizer'
-$touchpad = 'ETPS/2 Elantech Touchpad'
+$screen = 'eDP'
+$touchscreen = 'ELAN0732:00 04F3:2650 touch'
+$touchpad = 'SynPS/2 Synaptics Touchpad'
 $keyboard = 'AT Translated Set 2 keyboard'
 
 # disable keypad and touchpad on all but normal orientation
 $controlKeys = true
 
 # runs cmd and greps output to find orientation
-$orientationCmd = 'xrandr'
-$orientationRE = /\s*#{$screen}\s+\w+\s+[x+\d]+\s+(|left|right|inverted)\s*\(/
+$orientationCmd = 'xrandr --query --verbose'
+$orientationRE = /#{$screen}.*\ (normal|left|inverted|right) \c/
 
 # default direction
-$defaultDirection = 'right'
+$defaultDirection = 'normal'
 
 
 # CODE
@@ -45,7 +45,9 @@ def orientateCmd(orientation, transform)
     if $controlKeys
         setCmd = orientation == 'normal' ? 'xinput --enable ' 
                                          : 'xinput --disable '
-        controlKeys = "#{setCmd} '#{$touchpad}'; #{setCmd} '#{$keyboard}';"
+        # disable keyboard because we don't want stray keyboard inputs on a TWM, but don't disable touchpad because we need a way to recover if touchscreen breaks
+        controlKeys = "#{setCmd} '#$keyboard}';"
+        #controlKeys = "#{setCmd} '#{$touchpad}'; #{setCmd} '#{$keyboard}';"
     end
 
     return controlKeys +
